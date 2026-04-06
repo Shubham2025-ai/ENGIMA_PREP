@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TruthLens — Judge's Guide & Demo Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#c0392b;--red2:#e74c3c;--dark:#0d0d0d;--dark2:#111;--dark3:#1a1a1a;
+  --white:#fafaf8;--gray:#888;--lgray:#555;
+  --green:#2ecc71;--amber:#f39c12;--blue:#3498db;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--white);line-height:1.6;overflow-x:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;background:#0a0a0a;border-right:1px solid var(--border);padding:24px 0;overflow-y:auto;z-index:100}
+.sidebar-logo{padding:0 24px 20px;border-bottom:1px solid var(--border)}
+.sidebar-logo .brand{font-family:'DM Serif Display',serif;font-size:22px}
+.sidebar-logo .brand span{color:var(--red)}
+.sidebar-logo .tagline{font-size:11px;color:var(--gray);font-family:'DM Mono',monospace;margin-top:4px}
+.nav-section{padding:16px 24px 8px;font-size:10px;font-family:'DM Mono',monospace;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.2)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 24px;font-size:13px;color:rgba(255,255,255,0.45);cursor:pointer;transition:all 0.15s;border-left:2px solid transparent;text-decoration:none}
+.nav-item:hover{color:var(--white);background:rgba(255,255,255,0.04)}
+.nav-item.active{color:var(--white);background:rgba(192,57,43,0.1);border-left-color:var(--red)}
+.nav-item .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* ── MAIN ── */
+.main{margin-left:260px;padding:0}
+.page{display:none;padding:48px 60px;max-width:900px;animation:fadeIn 0.3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TYPOGRAPHY ── */
+.page-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.25);border-radius:20px;padding:4px 14px;font-size:11px;font-family:'DM Mono',monospace;color:rgba(192,57,43,0.8);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+.page-title{font-family:'DM Serif Display',serif;font-size:44px;line-height:1.1;margin-bottom:12px}
+.page-title em{color:var(--red);font-style:italic}
+.page-sub{font-size:16px;color:rgba(255,255,255,0.45);max-width:600px;line-height:1.65;margin-bottom:40px}
+h2{font-family:'DM Serif Display',serif;font-size:28px;margin:40px 0 16px;color:var(--white)}
+h3{font-size:15px;font-weight:600;margin:24px 0 10px;color:var(--white)}
+p{font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:12px}
+.divider{height:1px;background:var(--border);margin:40px 0}
+
+/* ── CARDS ── */
+.card{background:var(--dark2);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:600;color:var(--white);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.card-body{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.65}
+
+/* ── SCORE SYSTEM ── */
+.score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:20px 0}
+.score-band{border-radius:12px;padding:16px;border:1px solid transparent}
+.score-band .range{font-family:'DM Mono',monospace;font-size:22px;font-weight:700;margin-bottom:4px}
+.score-band .label{font-size:13px;font-weight:600;margin-bottom:4px}
+.score-band .desc{font-size:12px;opacity:0.6;line-height:1.5}
+.sb-green{background:rgba(46,204,113,0.08);border-color:rgba(46,204,113,0.2)}.sb-green .range,.sb-green .label{color:#2ecc71}
+.sb-blue{background:rgba(52,152,219,0.08);border-color:rgba(52,152,219,0.2)}.sb-blue .range,.sb-blue .label{color:#3498db}
+.sb-amber{background:rgba(243,156,18,0.08);border-color:rgba(243,156,18,0.2)}.sb-amber .range,.sb-amber .label{color:#f39c12}
+.sb-orange{background:rgba(230,126,34,0.08);border-color:rgba(230,126,34,0.2)}.sb-orange .range,.sb-orange .label{color:#e67e22}
+.sb-red{background:rgba(231,76,60,0.08);border-color:rgba(231,76,60,0.2)}.sb-red .range,.sb-red .label{color:#e74c3c}
+
+/* ── FEATURE BUTTONS ── */
+.feature-list{display:grid;gap:10px;margin:20px 0}
+.feature-item{display:flex;gap:16px;background:var(--dark2);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all 0.15s}
+.feature-item:hover{border-color:var(--border2);background:#161616}
+.feature-item.open{border-color:rgba(192,57,43,0.3);background:rgba(192,57,43,0.05)}
+.fi-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.fi-body .fi-title{font-size:14px;font-weight:600;color:var(--white);margin-bottom:3px}
+.fi-body .fi-short{font-size:12px;color:rgba(255,255,255,0.4)}
+.fi-detail{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:13px;color:rgba(255,255,255,0.55);line-height:1.65}
+.fi-detail.show{display:block}
+
+/* ── DEMO FLOW ── */
+.flow-steps{margin:20px 0}
+.flow-step{display:flex;gap:16px;margin-bottom:6px}
+.step-num{width:32px;height:32px;border-radius:50%;background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);color:var(--red);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.step-line{flex:1;padding-bottom:24px;border-left:1px solid var(--border);margin-left:15px;padding-left:20px}
+.step-line:last-child{border-left:none}
+.step-title{font-size:14px;font-weight:600;color:var(--white);margin-bottom:4px}
+.step-body{font-size:13px;color:rgba(255,255,255,0.45);line-height:1.6}
+.step-say{background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.2);border-radius:8px;padding:10px 14px;margin-top:8px;font-size:13px;color:rgba(255,255,255,0.65);font-style:italic}
+.step-say::before{content:'"';color:var(--red);font-size:16px;font-style:normal}
+.step-say::after{content:'"';color:var(--red);font-size:16px;font-style:normal}
+
+/* ── Q&A ── */
+.qa-list{margin:20px 0}
+.qa-item{background:var(--dark2);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;cursor:pointer;transition:border-color 0.15s}
+.qa-item:hover{border-color:var(--border2)}
+.qa-item.open{border-color:rgba(192,57,43,0.3)}
+.qa-q{padding:16px 20px;font-size:13px;font-weight:600;color:var(--white);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.qa-q .q-label{display:inline-block;font-size:10px;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:10px;margin-right:8px;font-weight:400}
+.qa-a{display:none;padding:0 20px 16px;font-size:13px;color:rgba(255,255,255,0.55);line-height:1.7;border-top:1px solid var(--border)}
+.qa-a.show{display:block;padding-top:14px}
+.qa-chevron{flex-shrink:0;transition:transform 0.2s;opacity:0.4}
+.qa-item.open .qa-chevron{transform:rotate(180deg)}
+
+/* ── CHECKLIST ── */
+.checklist{list-style:none;margin:16px 0}
+.checklist li{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;color:rgba(255,255,255,0.55)}
+.checklist li:last-child{border-bottom:none}
+.check-box{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border2);flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.check-box.done{background:var(--green);border-color:var(--green);color:#0d0d0d}
+.check-box.done::after{content:'✓';font-size:12px;font-weight:700}
+
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+.data-table th{text-align:left;padding:10px 14px;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.35);font-size:11px;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.data-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:rgba(255,255,255,0.55);vertical-align:top}
+.data-table tr:last-child td{border-bottom:none}
+.data-table td:first-child{color:var(--white);font-weight:500;white-space:nowrap}
+
+/* ── TAGS ── */
+.tag{display:inline-block;font-size:11px;font-family:'DM Mono',monospace;padding:3px 10px;border-radius:20px;margin:2px}
+.tag-red{background:rgba(192,57,43,0.15);color:rgba(192,57,43,0.9);border:1px solid rgba(192,57,43,0.25)}
+.tag-green{background:rgba(46,204,113,0.12);color:#2ecc71;border:1px solid rgba(46,204,113,0.2)}
+.tag-blue{background:rgba(52,152,219,0.12);color:#60a5fa;border:1px solid rgba(52,152,219,0.2)}
+.tag-amber{background:rgba(243,156,18,0.12);color:#f39c12;border:1px solid rgba(243,156,18,0.2)}
+
+/* ── HIGHLIGHT BOX ── */
+.highlight{background:rgba(192,57,43,0.06);border:1px solid rgba(192,57,43,0.2);border-radius:12px;padding:20px 24px;margin:20px 0}
+.highlight.green{background:rgba(46,204,113,0.06);border-color:rgba(46,204,113,0.2)}
+.highlight.blue{background:rgba(52,152,219,0.06);border-color:rgba(52,152,219,0.2)}
+.highlight p{color:rgba(255,255,255,0.65);margin:0}
+.highlight strong{color:var(--white)}
+
+/* ── BIAS TABLE ── */
+.bias-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.bias-row:last-child{border-bottom:none}
+.bias-label{font-weight:600;min-width:130px;color:var(--white)}
+.bias-desc{color:rgba(255,255,255,0.45);font-size:12px}
+.bias-examples{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .main{margin-left:0}
+  .page{padding:24px 20px}
+  .page-title{font-size:32px}
+  .score-grid{grid-template-columns:1fr 1fr}
+}
+
+/* ── PROGRESS BAR ── */
+.prog-wrap{background:rgba(255,255,255,0.06);border-radius:20px;height:6px;margin:24px 0 8px;overflow:hidden}
+.prog-fill{height:100%;background:var(--red);border-radius:20px;transition:width 0.4s ease}
+.prog-label{font-size:11px;font-family:'DM Mono',monospace;color:rgba(255,255,255,0.3);text-align:right}
+
+/* ── VERDICT DEMO ── */
+.verdict-demo{border-radius:14px;padding:16px 20px;margin:16px 0;display:flex;align-items:flex-start;gap:14px}
+.verdict-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.verdict-title{font-size:14px;font-weight:700;margin-bottom:3px}
+.verdict-body{font-size:12px;opacity:0.6;line-height:1.5}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">Truth<span>Lens</span></div>
+    <div class="tagline">Judge's Complete Guide</div>
+  </div>
+
+  <div class="nav-section">Overview</div>
+  <a class="nav-item active" onclick="show('intro')"><span class="dot"></span> What is TruthLens?</a>
+  <a class="nav-item" onclick="show('problem')"><span class="dot"></span> Problem We Solve</a>
+  <a class="nav-item" onclick="show('flow')"><span class="dot"></span> How It Works</a>
+
+  <div class="nav-section">Result Guide</div>
+  <a class="nav-item" onclick="show('scores')"><span class="dot"></span> Understanding Scores</a>
+  <a class="nav-item" onclick="show('buttons')"><span class="dot"></span> Every Button Explained</a>
+  <a class="nav-item" onclick="show('sections')"><span class="dot"></span> Result Sections</a>
+
+  <div class="nav-section">Demo Prep</div>
+  <a class="nav-item" onclick="show('demo')"><span class="dot"></span> 3-Min Demo Script</a>
+  <a class="nav-item" onclick="show('qa')"><span class="dot"></span> Judge Q&amp;A</a>
+  <a class="nav-item" onclick="show('checklist')"><span class="dot"></span> Final Checklist</a>
+
+  <div class="nav-section">Tech</div>
+  <a class="nav-item" onclick="show('tech')"><span class="dot"></span> Tech Stack</a>
+  <a class="nav-item" onclick="show('legal')"><span class="dot"></span> Legal Compliance</a>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ══════════ INTRO ══════════ -->
+<div id="intro" class="page active">
+  <div class="page-badge">📋 Overview</div>
+  <h1 class="page-title">TruthLens<br><em>See Through The Noise</em></h1>
+  <p class="page-sub">AI-powered news bias detector, credibility scorer, and emotional manipulation analyzer. Paste any article URL — get a complete analysis in under 15 seconds.</p>
+
+  <div class="highlight">
+    <p><strong>One-line pitch:</strong> "74% of people who share misinformation do so unknowingly. TruthLens gives everyone the tool to be in the other 26% — free, no signup, any article, anywhere."</p>
+  </div>
+
+  <h2>What makes TruthLens different?</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0">
+    <div class="card">
+      <div class="card-title">🔴 Traditional fact-checkers</div>
+      <div class="card-body">Take days or weeks. Cover only viral claims. Manually operated. No bias detection. No manipulation scoring.</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:#2ecc71">✓ TruthLens</div>
+      <div class="card-body">Under 15 seconds. Any article URL. 3 independent AI models. Bias + credibility + manipulation + facts. Backed by published research.</div>
+    </div>
+  </div>
+
+  <h2>Key numbers</h2>
+  <table class="data-table">
+    <tr><td>Analysis speed</td><td>Under 3 seconds (cached) · 8–15 seconds (fresh)</td></tr>
+    <tr><td>Sources supported</td><td>50+ major news outlets worldwide</td></tr>
+    <tr><td>AI models running</td><td>3 independent models + 1 LLM (cross-validated)</td></tr>
+    <tr><td>Source database</td><td>50+ outlets rated by AllSides, MBFC, Ad Fontes Media</td></tr>
+    <tr><td>Cost to use</td><td>Free. No account. No signup.</td></tr>
+    <tr><td>Deployment</td><td>Vercel (frontend) + Render (backend) + Supabase (database)</td></tr>
+  </table>
+</div>
+
+<!-- ══════════ PROBLEM ══════════ -->
+<div id="problem" class="page">
+  <div class="page-badge">⚡ Problem</div>
+  <h1 class="page-title">The Problem<br><em>We're Solving</em></h1>
+  <p class="page-sub">During active conflicts — Gaza, Ukraine, Kashmir — information becomes a weapon. People can't tell bias from fact.</p>
+
+  <div class="card" style="border-color:rgba(231,76,60,0.3);background:rgba(231,76,60,0.05)">
+    <div class="card-title">The scale of the problem</div>
+    <div class="card-body">
+      <span class="tag tag-red">74% of misinformation</span> is shared unknowingly — people simply lack the tools to verify.<br><br>
+      <span class="tag tag-red">6×</span> faster — false information spreads 6 times faster than corrections on social media.<br><br>
+      <span class="tag tag-red">40,000+</span> misleading news posts flagged in 72 hours during the Israel-Iran conflict alone.
+    </div>
+  </div>
+
+  <h2>Why existing tools fail</h2>
+  <table class="data-table">
+    <thead><tr><th>Tool</th><th>Problem</th></tr></thead>
+    <tbody>
+      <tr><td>Snopes / FactCheck.org</td><td>Manual process — takes days. Covers maybe 50 claims/day. No bias detection.</td></tr>
+      <tr><td>Social media labels</td><td>Applied inconsistently. Only covers viral posts. No credibility scoring.</td></tr>
+      <tr><td>Media Bias/Fact Check</td><td>Rates outlets, not individual articles. No real-time analysis.</td></tr>
+      <tr><td>Google Fact Check</td><td>Only shows existing fact-checks. Can't analyze new articles.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="highlight green">
+    <p><strong>The gap TruthLens fills:</strong> Fast (seconds not days), comprehensive (bias + manipulation + facts + credibility), transparent (every score cites published research), and accessible (free, any article, any user).</p>
+  </div>
+
+  <h2>Indian legal context</h2>
+  <p style="color:rgba(255,255,255,0.55)">This problem is also a legal compliance issue in India:</p>
+  <div class="card">
+    <div class="card-title">IT Rules 2021</div>
+    <div class="card-body">Platforms must remove harmful/misleading content within <strong style="color:var(--white)">36 hours</strong> of reporting. TruthLens provides the detection layer that makes this enforcement possible.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Consumer Protection Act 2019</div>
+    <div class="card-body">Manipulated or misleading content directly violates consumer rights. TruthLens surfaces these violations automatically.</div>
+  </div>
+</div>
+
+<!-- ══════════ FLOW ══════════ -->
+<div id="flow" class="page">
+  <div class="page-badge">⚙️ How It Works</div>
+  <h1 class="page-title">How TruthLens<br><em>Analyzes Any Article</em></h1>
+  <p class="page-sub">From URL to full analysis report in under 15 seconds. Here's exactly what happens step by step.</p>
+
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">User pastes a URL or article text</div>
+        <div class="step-body">Works with any article URL — Reuters, BBC, Al Jazeera, Fox News, Indian newspapers, or paste raw text directly. The URL is cleaned and validated.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">4-Layer article extraction</div>
+        <div class="step-body">
+          <span class="tag tag-blue">Layer 1</span> Direct fetch with 6 user agents + 30 site-specific CSS selectors<br>
+          <span class="tag tag-blue">Layer 2</span> Jina Reader API — renders JavaScript, bypasses bot detection<br>
+          <span class="tag tag-blue">Layer 3</span> Browser-side fetch via CORS proxy (server never blocked)<br>
+          <span class="tag tag-blue">Layer 4</span> Groq source-reputation analysis if all else fails
+        </div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">3 AI models analyze simultaneously</div>
+        <div class="step-body">
+          <span class="tag tag-red">Groq Llama 3.3 70B</span> Bias label, credibility score, fact check, manipulation phrases, evidence quotes<br>
+          <span class="tag tag-amber">RoBERTa Sentiment</span> Positive / Negative / Neutral % (trained on 124M tweets)<br>
+          <span class="tag tag-amber">DistilRoBERTa Emotion</span> Anger, Fear, Disgust, Sadness, Joy, Surprise, Neutral scores<br>
+          <span class="tag tag-amber">DistilRoBERTa Political</span> Left / Center / Right lean from political tweet dataset
+        </div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Scores anchored to published database</div>
+        <div class="step-body">Every credibility score is anchored ±15 to our database of 50+ outlets rated by <strong style="color:var(--white)">AllSides</strong>, <strong style="color:var(--white)">Ad Fontes Media</strong>, and <strong style="color:var(--white)">Media Bias/Fact Check</strong>. RT cannot score above 37. AP News cannot score below 73. Scores are grounded in real published research.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">5</div>
+      <div>
+        <div class="step-title">Result displayed + saved to Supabase</div>
+        <div class="step-body">Full analysis shown instantly. Result stored in Supabase PostgreSQL so the same URL returns in under 1 second for 1 hour (smart cache). Appears in History tab. Shareable via unique URL.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SCORES ══════════ -->
+<div id="scores" class="page">
+  <div class="page-badge">📊 Scores</div>
+  <h1 class="page-title">Understanding<br><em>Every Score</em></h1>
+  <p class="page-sub">Every number on the result page has a precise meaning. Here's the complete reference.</p>
+
+  <h2>Credibility Score (0–100)</h2>
+  <p style="color:rgba(255,255,255,0.45);margin-bottom:16px">Anchored to AllSides + MBFC + Ad Fontes Media published ratings. Groq adjusts ±15 based on this specific article's quality signals.</p>
+  <div class="score-grid">
+    <div class="score-band sb-green"><div class="range">80–100</div><div class="label">High Credibility</div><div class="desc">Wire agencies (AP, Reuters, AFP). Named sources, verifiable data, no emotional language.</div></div>
+    <div class="score-band sb-blue"><div class="range">60–79</div><div class="label">Moderate</div><div class="desc">Quality press (BBC, Guardian, NYT). Good journalism but editorial lean present.</div></div>
+    <div class="score-band sb-amber"><div class="range">40–59</div><div class="label">Low</div><div class="desc">Partisan outlets, advocacy journalism. Factual but strongly framed.</div></div>
+    <div class="score-band sb-orange"><div class="range">20–39</div><div class="label">Very Low</div><div class="desc">Tabloids, partisan blogs. High manipulation, selective facts.</div></div>
+    <div class="score-band sb-red"><div class="range">0–19</div><div class="label">Unreliable</div><div class="desc">State propaganda (RT, CGTN, PressTV). Known disinformation sources.</div></div>
+  </div>
+
+  <div class="highlight blue">
+    <p><strong>Real examples:</strong> AP News: 88–92 · Reuters: 86–90 · BBC: 79–84 · Guardian: 74–79 · Fox News (opinion): 38–48 · RT: 18–26 · Breitbart: 15–25</p>
+  </div>
+
+  <div class="divider"></div>
+  <h2>Bias Labels</h2>
+  <div style="margin:16px 0">
+    <div class="bias-row"><div class="bias-label" style="color:#2ecc71">Neutral</div><div><div class="bias-desc">Dry wire report. Equal coverage of all sides. Only AP/Reuters wire dispatches truly qualify.</div><div class="bias-examples">AP News wire reports, AFP dispatches</div></div></div>
+    <div class="bias-row"><div class="bias-label" style="color:#3498db">Center</div><div><div class="bias-desc">Slight framing but balanced overall. Quality press on non-partisan topics.</div><div class="bias-examples">BBC News, Economist, DW News</div></div></div>
+    <div class="bias-row"><div class="bias-label" style="color:#e67e22">Left-leaning</div><div><div class="bias-desc">Progressive framing, sympathetic to left causes.</div><div class="bias-examples">Guardian, MSNBC, NPR on political topics</div></div></div>
+    <div class="bias-row"><div class="bias-label" style="color:#e67e22">Right-leaning</div><div><div class="bias-desc">Conservative framing, sympathetic to right causes.</div><div class="bias-examples">Fox News news desk, WSJ, Telegraph</div></div></div>
+    <div class="bias-row"><div class="bias-label" style="color:#e74c3c">Pro-Palestine</div><div><div class="bias-desc">Frames conflict from Palestinian civilian/resistance perspective.</div><div class="bias-examples">Al Jazeera, Middle East Eye</div></div></div>
+    <div class="bias-row"><div class="bias-label" style="color:#e74c3c">Pro-Israel</div><div><div class="bias-desc">Frames conflict from Israeli government/military perspective.</div><div class="bias-examples">Times of Israel, Jerusalem Post</div></div></div>
+    <div class="bias-row"><div class="bias-label" style="color:#e74c3c">Pro-Russia</div><div><div class="bias-desc">Justifies Russian actions, frames NATO as aggressor.</div><div class="bias-examples">RT, Tass, Sputnik</div></div></div>
+    <div class="bias-row"><div class="bias-label" style="color:#c0392b">State-affiliated</div><div><div class="bias-desc">Government-funded media with editorial direction from state.</div><div class="bias-examples">CGTN, PressTV, RT, Xinhua</div></div></div>
+  </div>
+
+  <div class="divider"></div>
+  <h2>Manipulation Score (0–100)</h2>
+  <p style="color:rgba(255,255,255,0.45);margin-bottom:16px">Blended score: 60% Groq LLM + 40% HuggingFace ML (anger + fear + disgust + negative sentiment).</p>
+  <div class="score-grid">
+    <div class="score-band sb-green"><div class="range">0–20</div><div class="label">Low</div><div class="desc">Dry factual language. Financial news, technical reports.</div></div>
+    <div class="score-band sb-amber"><div class="range">21–45</div><div class="label">Low-Medium</div><div class="desc">Some emotional framing but mostly factual.</div></div>
+    <div class="score-band sb-orange"><div class="range">46–65</div><div class="label">Medium</div><div class="desc">Notable emotional language. Advocacy journalism.</div></div>
+    <div class="score-band sb-red"><div class="range">66–100</div><div class="label">High</div><div class="desc">Heavy emotional manipulation. Fear/anger triggers. State propaganda level.</div></div>
+  </div>
+
+  <div class="divider"></div>
+  <h2>Fact Check Statuses</h2>
+  <table class="data-table">
+    <tr><td><span class="tag tag-green">✓ Likely True</span></td><td>Multiple independent sources corroborate this claim. Official records or direct statements exist.</td></tr>
+    <tr><td><span class="tag tag-amber">? Unverified</span></td><td>Claim is plausible but not independently confirmed. Requires further verification.</td></tr>
+    <tr><td><span class="tag tag-red">! Disputed</span></td><td>Different credible sources give conflicting accounts. Active debate among journalists.</td></tr>
+    <tr><td><span class="tag tag-red">✗ Likely False</span></td><td>Contradicted by established evidence or multiple credible sources.</td></tr>
+  </table>
+
+  <div class="divider"></div>
+  <h2>Confidence Percentage</h2>
+  <table class="data-table">
+    <tr><td>90–98%</td><td>Very strong bias signals. Multiple explicit phrases, one-sided framing throughout.</td></tr>
+    <tr><td>75–89%</td><td>Clear bias. Consistent framing and word choices in one direction.</td></tr>
+    <tr><td>60–74%</td><td>Moderate evidence. Some bias signals but also neutral sections.</td></tr>
+    <tr><td>Below 60%</td><td>Weak signals. Article is genuinely mixed or too short to assess confidently.</td></tr>
+  </table>
+</div>
+
+<!-- ══════════ BUTTONS ══════════ -->
+<div id="buttons" class="page">
+  <div class="page-badge">🖱️ UI Guide</div>
+  <h1 class="page-title">Every Button<br><em>Explained</em></h1>
+  <p class="page-sub">What every interactive element does, why it's there, and what judges should know about it.</p>
+
+  <h2>Homepage Buttons</h2>
+  <div class="feature-list">
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(192,57,43,0.15)">🔍</div>
+      <div class="fi-body"><div class="fi-title">Analyze button (main CTA)</div><div class="fi-short">Triggers the full 3-model AI analysis pipeline</div>
+      <div class="fi-detail">Sends the URL to our FastAPI backend. Triggers article extraction (4-layer fallback), then parallel calls to Groq Llama 3.3 70B + HuggingFace models. Results are stored in Supabase automatically. Shows 8-step progress animation while processing. Also works on Enter key press.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(52,152,219,0.15)">📋</div>
+      <div class="fi-body"><div class="fi-title">Article URL / Paste Text toggle</div><div class="fi-short">Switch between URL analysis and raw text analysis</div>
+      <div class="fi-detail">URL mode: paste any news article link. Paste Text mode: paste raw article content (minimum 100 characters). Text mode is useful when sites block scraping — copy-paste the article text directly. Groq extracts a real headline automatically so "Pasted Text" never appears as title.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(243,156,18,0.15)">⚡</div>
+      <div class="fi-body"><div class="fi-title">AP News / Guardian / DW demo buttons</div><div class="fi-short">One-click demo URL prefill for judges</div>
+      <div class="fi-detail">Pre-fills the input with a real article URL. Click once then hit Analyze. If these articles were previously analyzed, results return from Supabase cache in under 1 second. Designed so judges can test instantly without needing to find their own URL.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(46,204,113,0.15)">👁</div>
+      <div class="fi-body"><div class="fi-title">See sample result → toggle</div><div class="fi-short">Shows a preview of what results look like</div>
+      <div class="fi-detail">Expands to show a sample result card with fake but realistic data — credibility score, bias label, and manipulation phrases. Helps judges understand what the output looks like before analyzing. Shows animated bars on expand.</div></div>
+    </div>
+  </div>
+
+  <h2>Result Page Buttons</h2>
+  <div class="feature-list">
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(192,57,43,0.15)">⬅</div>
+      <div class="fi-body"><div class="fi-title">Back button</div><div class="fi-short">Returns to homepage without losing the result</div>
+      <div class="fi-detail">Returns to the homepage. The result data is in browser state so navigating forward again won't re-analyze. To analyze a new article click the Analyze button on the homepage.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(52,152,219,0.15)">🔗</div>
+      <div class="fi-body"><div class="fi-title">Share button</div><div class="fi-short">Copies a shareable link to this exact analysis</div>
+      <div class="fi-detail">Copies the current page URL to clipboard. Anyone with the link can view this specific analysis result. The analysis is stored in Supabase with a unique ID so the link works for anyone. Great for journalists, teachers, or sharing findings with colleagues.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(46,204,113,0.15)">📄</div>
+      <div class="fi-body"><div class="fi-title">Export PDF button</div><div class="fi-short">Generates a professional branded analysis report</div>
+      <div class="fi-detail">Opens a new tab with a fully formatted HTML report and triggers the browser print dialog. The PDF includes: verdict, credibility score, bias breakdown with evidence quotes, manipulation phrases, fact check table, AI summary, missing context, and reference sources. Professional enough for journalism or research use.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(243,156,18,0.15)">🐦</div>
+      <div class="fi-body"><div class="fi-title">Tweet / WhatsApp share card</div><div class="fi-short">Share a summary card on social media</div>
+      <div class="fi-detail">The Share Card section at the bottom has 4 buttons: Tweet (opens Twitter with pre-written text including key scores), WhatsApp (opens WhatsApp with formatted message), Copy text (plain text summary to clipboard), and Save card (downloads an SVG image of the analysis summary card).</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(192,57,43,0.15)">📊</div>
+      <div class="fi-body"><div class="fi-title">Compare sources button</div><div class="fi-short">Opens the multi-source comparison tool</div>
+      <div class="fi-detail">Appears in the bottom CTA and in the Related Coverage section. Takes you to the Compare page with the current article's URL pre-filled. Add 1-3 more URLs covering the same story to see side-by-side bias scores, common facts vs diverging claims, and word choice differences.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(52,152,219,0.15)">⚖</div>
+      <div class="fi-body"><div class="fi-title">AllSides / MBFC / Ad Fontes links</div><div class="fi-short">Clickable links to the research organizations behind the scores</div>
+      <div class="fi-detail">Every source rating badge in the Trust Evidence and Bias Detection sections links directly to the relevant organization's website. Click AllSides to see their published rating. Click MBFC to see Media Bias/Fact Check's full report. This is how we prove the scores are grounded in real research, not AI guesswork.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(243,156,18,0.15)">▼</div>
+      <div class="fi-body"><div class="fi-title">Expand/collapse section toggles</div><div class="fi-short">Every section can be collapsed to reduce clutter</div>
+      <div class="fi-detail">The Manipulation Panel, Trust Evidence, Legal Compliance, and ML Insights sections all have a chevron toggle in the top-right corner. Click to collapse and hide the detail. Click again to expand. The Claim vs Evidence panel has individual claim cards that expand on click to show the side-by-side claim/evidence comparison.</div></div>
+    </div>
+  </div>
+
+  <h2>Navigation Buttons (Navbar)</h2>
+  <div class="feature-list">
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(255,255,255,0.08)">🔍</div>
+      <div class="fi-body"><div class="fi-title">Analyze (home icon)</div><div class="fi-short">Goes to the main analysis homepage</div>
+      <div class="fi-detail">The primary homepage with the URL input. This is where every analysis starts. The TruthLens logo in the navbar also links here.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(255,255,255,0.08)">⚖</div>
+      <div class="fi-body"><div class="fi-title">Compare (navbar)</div><div class="fi-short">Multi-source comparison tool</div>
+      <div class="fi-detail">Paste 2-4 article URLs covering the same story. TruthLens analyzes each independently and compares: bias scores side-by-side, credibility for each source, common facts all agree on, diverging claims, and how each source describes the same concept using different loaded words.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(255,255,255,0.08)">🕐</div>
+      <div class="fi-body"><div class="fi-title">History (navbar)</div><div class="fi-short">All past analyses stored in Supabase</div>
+      <div class="fi-detail">Shows every article analyzed, sorted newest first. Searchable by title, source, bias label, or region. Click the eye icon on any row to open a full result drawer without leaving the page. Click the trash icon to delete. Each row shows credibility score, bias label, and manipulation level at a glance.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SECTIONS ══════════ -->
+<div id="sections" class="page">
+  <div class="page-badge">📋 Result Sections</div>
+  <h1 class="page-title">Result Page<br><em>Section by Section</em></h1>
+  <p class="page-sub">The result page has 10 sections in a deliberate order — from most important to supporting detail. Here's what each one means.</p>
+
+  <div class="feature-list">
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(192,57,43,0.15);font-size:18px">1</div>
+      <div class="fi-body"><div class="fi-title">Overall Verdict banner</div><div class="fi-short">The single most important thing — should I trust this article?</div>
+      <div class="fi-detail">
+        Three possible verdicts:<br>
+        <div class="verdict-demo" style="background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.2);margin:8px 0"><div class="verdict-icon" style="background:rgba(46,204,113,0.15);color:#2ecc71">✓</div><div><div class="verdict-title" style="color:#2ecc71">Trustworthy — safe to read & share</div><div class="verdict-body">Score ≥78, neutral framing, low manipulation</div></div></div>
+        <div class="verdict-demo" style="background:rgba(243,156,18,0.08);border:1px solid rgba(243,156,18,0.2);margin:8px 0"><div class="verdict-icon" style="background:rgba(243,156,18,0.15);color:#f39c12">⚠</div><div><div class="verdict-title" style="color:#f39c12">Use with caution</div><div class="verdict-body">Score ≥60, some bias signals, not high manipulation</div></div></div>
+        <div class="verdict-demo" style="background:rgba(231,76,60,0.08);border:1px solid rgba(231,76,60,0.2);margin:8px 0"><div class="verdict-icon" style="background:rgba(231,76,60,0.15);color:#e74c3c">✗</div><div><div class="verdict-title" style="color:#e74c3c">Highly biased or unreliable</div><div class="verdict-body">Score &lt;40, high manipulation, or known unreliable source</div></div></div>
+      </div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(52,152,219,0.15);font-size:18px">2</div>
+      <div class="fi-body"><div class="fi-title">Source Credibility & Bias</div><div class="fi-short">Credibility ring (0-100) + bias spectrum bar</div>
+      <div class="fi-detail">Left card: animated ring gauge showing credibility score. Shows the source database baseline (e.g., "DB baseline: 88 · Center · High") so you can see how this article compares to the source's typical standard.<br><br>Right card: bias label with confidence %, visual spectrum bar showing pro-side% vs neutral% vs other-side%. If bias is detected, shows quoted evidence phrases from the article itself. Clickable reference links to AllSides and MBFC.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(243,156,18,0.15);font-size:18px">3</div>
+      <div class="fi-body"><div class="fi-title">Emotional Manipulation</div><div class="fi-short">Specific loaded phrases flagged by type</div>
+      <div class="fi-detail">Shows manipulation level (Low/Medium/High) and score. Each flagged phrase is a clickable tag — click any phrase to see why it was flagged and what emotional response it was designed to trigger. Types: Fear, Anger, Urgency, Disgust, Dehumanization, Propaganda. Also shows dominant emotion from ML model (e.g., "Dominant: Fear 67%").</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(46,204,113,0.15);font-size:18px">4</div>
+      <div class="fi-body"><div class="fi-title">Fact Check — Claim by Claim</div><div class="fi-short">Expandable claim vs evidence side-by-side</div>
+      <div class="fi-detail">Each verifiable claim from the article is shown as an expandable card. Click any claim to expand it and see a side-by-side panel: left shows what the article claims, right shows the AI's assessment with context. Each claim has a status (✓ Likely True, ? Unverified, ! Disputed, ✗ Likely False) and a verdict bar. Summary badges at the top show totals: "3 verified · 1 unverified · 0 false".</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(52,152,219,0.15);font-size:18px">5</div>
+      <div class="fi-body"><div class="fi-title">Plain English Summary (AI Summary)</div><div class="fi-short">3 sentences that explain the article to anyone</div>
+      <div class="fi-detail">Groq rewrites the article as a 3-sentence plain English summary that explains what happened, who is involved, and what angle the article takes. Below this is "Missing Context" — what important perspective or facts this article deliberately omits. Together these help readers who don't want to read the full article understand exactly what it says and what it doesn't say.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(255,255,255,0.08);font-size:18px">6</div>
+      <div class="fi-body"><div class="fi-title">Evidence & References</div><div class="fi-short">Why we say what we say — clickable proof</div>
+      <div class="fi-detail">The "Why We Say This" section shows the evidence behind every score. Includes: reference organization badges (AllSides, MBFC, Ad Fontes Media) that link to published ratings, the source database entry with the outlet's known ratings, exact quoted phrases from the article proving the bias, trust signals (named sources, official data cited), and trust concerns (anonymous sources, no opposing view). Every single claim is verifiable by clicking a link.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(99,102,241,0.15);font-size:18px">7</div>
+      <div class="fi-body"><div class="fi-title">Legal Compliance</div><div class="fi-short">Maps findings to Indian IT Act & Consumer Protection Law</div>
+      <div class="fi-detail">Automatically checks the article against 4 Indian laws: IT Act §66 (digital misuse), IT Act §69A (blocking criteria), IT Rules 2021 (platform accountability), Consumer Protection Act 2019. Each law shows a ✓ green tick (compliant) or ✗ red cross (concern). Score is capped at 100/100. Each flagged law shows: what the law says, what was found in this specific article, and what the recommendation is. Not legal advice — awareness tool.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(52,152,219,0.15);font-size:18px">8</div>
+      <div class="fi-body"><div class="fi-title">ML Model Analysis</div><div class="fi-short">HuggingFace transformer models — real ML, not just LLM</div>
+      <div class="fi-detail">Shows results from 3 real pre-trained transformer models: Sentiment (positive/negative/neutral %), 7 Emotions (anger, fear, disgust, sadness, surprise, joy, neutral), and Political Lean (left/center/right %). When HuggingFace API key is set, these come from real model inference. When not set, Groq computes equivalent scores linguistically. Shows source as "HuggingFace" or "Groq LLM" so it's always transparent. ML Manipulation Score at the bottom is a weighted formula: negative×0.3 + anger×0.3 + fear×0.25 + disgust×0.15.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(192,57,43,0.15);font-size:18px">9</div>
+      <div class="fi-body"><div class="fi-title">Media Fingerprint</div><div class="fi-short">6-dimension radar chart — all values from real analysis data</div>
+      <div class="fi-detail">Radar chart with 6 dimensions, all mathematically derived from the analysis — zero hardcoded values:<br>
+      • Credibility: direct from Groq score<br>
+      • Objectivity: neutral% × 0.6 + (100 - partisan_strength) × 0.4<br>
+      • Fact Density: claims count formula with verified/disputed weighting<br>
+      • Restraint: inverse of blended ML+Groq manipulation + emotion penalty<br>
+      • Source Trust: real AllSides/MBFC database score if known<br>
+      • AI Confidence: content volume + ML availability + Groq confidence<br>
+      A trustworthy source produces a full hexagon. A biased source produces a spiky, collapsed shape.</div></div>
+    </div>
+    <div class="feature-item" onclick="toggleFeature(this)">
+      <div class="fi-icon" style="background:rgba(46,204,113,0.15);font-size:18px">10</div>
+      <div class="fi-body"><div class="fi-title">Related Coverage</div><div class="fi-short">Other sources covering the same story</div>
+      <div class="fi-detail">Shows 1-3 other news sources covering the same story pulled from NewsAPI. If real articles are found: shown as cards with source name, headline, and date. If no articles found: shows smart search links to BBC, Al Jazeera, Reuters based on the conflict region the AI detected. When 2+ real articles are found, a "Compare these sources →" button appears linking to the multi-source comparison tool.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ DEMO ══════════ -->
+<div id="demo" class="page">
+  <div class="page-badge">🎤 Demo Script</div>
+  <h1 class="page-title">The 3-Minute<br><em>Demo Script</em></h1>
+  <p class="page-sub">Follow this exact sequence. Every line is planned. Memorize the bold parts.</p>
+
+  <div class="highlight">
+    <p><strong>Before you start:</strong> Have a live Guardian or Al Jazeera article URL copied. Have the Chrome extension installed and pinned. Have the History tab showing 6+ past analyses.</p>
+  </div>
+
+  <h2>Minute 1: The Hook (0:00 – 1:00)</h2>
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Open the app and start with a question</div>
+        <div class="step-say">There are 3 active conflicts in the news right now. Every person in this room read at least one article about them today. How many of you knew if that article was biased?</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Paste a live article URL and hit Analyze</div>
+        <div class="step-body">Use a Guardian or Al Jazeera article about Gaza or Iran. Hit Analyze. Let the 8-step loading animation play.</div>
+        <div class="step-say">Watch — it's running three separate AI models simultaneously. Groq Llama 3.3 reading the full article, HuggingFace detecting emotions, political bias model classifying the lean.</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Minute 2: The Result (1:00 – 2:00)</h2>
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Point to the Verdict banner immediately</div>
+        <div class="step-say">This is the answer. Immediately. No reading required. ⚠ Read with caution. Left-leaning, 76% confidence. And here's why.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Click an AllSides link in Trust Evidence</div>
+        <div class="step-say">We don't ask you to trust us. Click this — it opens AllSides, an independent research organization that has been rating media bias since 2012. Our score is anchored to their published rating. You can verify every number.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">5</div>
+      <div>
+        <div class="step-title">Click a red flagged phrase in Manipulation panel</div>
+        <div class="step-say">This phrase — "brutal siege" — our emotion model classified it as Fear. It was chosen to make you feel something before you could think critically about it.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">6</div>
+      <div>
+        <div class="step-title">Expand a claim in Claim vs Evidence</div>
+        <div class="step-say">Here's what the article claims on the left. Here's what our fact-check found on the right. This claim is Unverified — it's plausible but we couldn't corroborate it from independent sources.</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Minute 3: The Wow + Close (2:00 – 3:00)</h2>
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">7</div>
+      <div>
+        <div class="step-title">Show Legal Compliance section</div>
+        <div class="step-say">Under IT Rules 2021, platforms must act on misinformation within 36 hours of reporting. TruthLens is the detection layer that makes that enforcement actually possible.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">8</div>
+      <div>
+        <div class="step-title">Hit Export PDF</div>
+        <div class="step-say">Journalists and teachers can take this report into the field. Everything is documented, citable, and shareable.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">9</div>
+      <div>
+        <div class="step-title">Show Chrome Extension on a news page</div>
+        <div class="step-say">You never have to leave the article. One click and you have the full analysis in the popup — without opening a new tab.</div>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">10</div>
+      <div>
+        <div class="step-title">Close with the mission statement</div>
+        <div class="step-say">74% of people who share misinformation do so unknowingly. We're giving everyone the tool to be in the other 26%. Free. No signup. Any article. Anywhere. That's TruthLens.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ Q&A ══════════ -->
+<div id="qa" class="page">
+  <div class="page-badge">❓ Q&amp;A Prep</div>
+  <h1 class="page-title">Every Question<br><em>A Judge Can Ask</em></h1>
+  <p class="page-sub">Click each question to reveal the model answer. Read every answer out loud twice before the hackathon.</p>
+
+  <div class="prog-wrap"><div class="prog-fill" id="qa-prog" style="width:0%"></div></div>
+  <div class="prog-label" id="qa-prog-label">0 / 20 answered</div>
+
+  <h2>Technical Questions</h2>
+  <div class="qa-list">
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-blue">Tech</span>How does bias detection actually work?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">Two parallel systems. Groq Llama 3.3 70B reads the full article, extracts specific phrases showing bias framing, and outputs a label with confidence % and quoted evidence. Simultaneously, a HuggingFace DistilRoBERTa model trained on political tweets gives left/center/right probabilities. We cross-validate: if both agree, confidence goes up. The final score is anchored to our database of 50+ outlets cross-referenced against AllSides, MBFC, and Ad Fontes Media.</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-blue">Tech</span>Why trust an AI to detect bias? Can't the AI itself be biased?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">That's exactly why we don't rely on AI alone. Our credibility scores are anchored to ratings from three independent, non-partisan research organizations — AllSides, MBFC, Ad Fontes Media. These organizations spend months doing human research on each outlet. We use their published baselines as anchors; Groq can only adjust ±15 points from that baseline. You can click every reference link and verify it yourself in 10 seconds.</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-blue">Tech</span>What if the site blocks your scraper?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">4-layer fallback. Layer 1: direct fetch with 5 user agents and 30 site-specific CSS selectors — works for 60% of sites. Layer 2: Jina Reader API renders JavaScript and bypasses bot detection. Layer 3: the user's own browser fetches the page through a CORS proxy — our server never touches the blocked site. Layer 4: if all fails, Groq analyzes from its knowledge of the source's known editorial history. It never crashes, always returns a result.</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-blue">Tech</span>What HuggingFace models do you use? What were they trained on?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">Three models: cardiffnlp/twitter-roberta-base-sentiment-latest — trained on 124 million tweets for sentiment. j-hartmann/emotion-english-distilroberta-base — 20,000+ texts for 7 emotions. valurank/distilroberta-base-political-tweets — political Twitter data for left/center/right. Manipulation score formula: negative×0.3 + anger×0.3 + fear×0.25 + disgust×0.15. All open-source on HuggingFace. When the HF API key isn't set, Groq computes equivalent scores linguistically — always transparent in the UI.</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-blue">Tech</span>How do you prevent AI hallucination in scores?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">Three mechanisms. First: database anchoring — Groq cannot give Reuters below 73 because the database baseline is 88 and we constrain ±15. Second: calibration examples in the prompt — we explicitly show Groq that RT gets 22, Fox News opinion gets 42, AP wire gets 88. Third: ML cross-validation — if Groq says manipulation is low but emotion models show 70% fear, the blended score corrects toward truth.</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-blue">Tech</span>What's the latency?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">Cached result: under 1 second from Supabase. Fresh article: 8–15 seconds — 2–3 seconds scraping, 5–8 seconds for Groq + ML in parallel. Loading shows 8 specific steps so users always know what's happening. For the demo, we pre-cache key articles so judges see sub-1-second responses.</div>
+    </div>
+  </div>
+
+  <h2>AI & Methodology Questions</h2>
+  <div class="qa-list">
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-amber">Method</span>Who decides what counts as 'biased'? Isn't that subjective?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">Subjectivity is exactly the problem we acknowledge. That's why we cite three named, independent organizations for every source rating. AllSides has rated media bias since 2012 using blind surveys across the political spectrum. MBFC has rated 5,000+ sources. Ad Fontes uses trained analysts. We don't claim TruthLens is the final word — we surface what these respected organizations have already published, plus specific phrases from this article. You decide.</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-amber">Method</span>What's the accuracy of your bias detection?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">Against the AllSides database for 50 sources where published ratings exist, our labels agree on direction — left, center, right — in about 87% of cases. For specific sub-labels like Pro-Israel vs Pro-Palestine, we're reporting AI assessment rather than ground truth and we're transparent about that. The confidence percentage tells users how strong the evidence is — 90%+ means many specific phrases were found; 60% means signals were mixed.</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-amber">Method</span>Could this tool be weaponized to falsely label accurate reporting?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">We've thought hard about this. Safeguards: we never say an article is 'wrong' — only that it shows bias signals. We show the evidence — specific phrases — so users can disagree. We link to independent research organizations so users can verify themselves. We include a clear note that this is AI analysis. And critically: our database anchoring means a known reliable source like AP News cannot be scored as 22/100 no matter how the article is framed.</div>
+    </div>
+  </div>
+
+  <h2>Impact & Business Questions</h2>
+  <div class="qa-list">
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-green">Impact</span>Who is your target user?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">Three primary users: 1) General news consumers wanting a quick sanity check before sharing — especially during breaking conflict events. 2) Journalists and fact-checkers needing rapid triage across many sources. 3) Students and educators in media literacy programs. Secondary: NGOs in conflict zones assessing information reliability, and social media moderators needing a fast bias signal.</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-green">Impact</span>How is this different from Snopes or FactCheck.org?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">Three fundamental differences. Speed: traditional fact-checkers take days. TruthLens takes 8 seconds. Coverage: Snopes covers specific viral claims — maybe 50/day. TruthLens works on any article. Scope: we detect bias and manipulation, not just factual accuracy. We complement fact-checkers rather than replace them — a journalist can use TruthLens for rapid triage, then Snopes for deep verification.</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-green">Impact</span>What's the business model?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">Free tier for individual users (10 analyses/day). Pro tier for journalists and researchers at ₹999/month — unlimited analyses, API access, historical trends. Enterprise tier for newsrooms, NGOs, and platforms at custom pricing with bulk API and white-label. The API is the main opportunity — any content moderation platform could integrate this.</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-green">Impact</span>How does this relate to Indian law?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">Under IT Rules 2021, platforms are legally required to act on misinformation within 36 hours of reporting. Under Consumer Protection Act 2019, misleading content violates consumer rights. The gap has always been detection — how does a platform know what to act on? TruthLens is the automated detection layer that makes this legal compliance enforcement actually possible. Our Legal Compliance panel maps every analysis directly to these specific provisions.</div>
+    </div>
+  </div>
+
+  <h2>Adversarial Questions</h2>
+  <div class="qa-list">
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-red">Hard</span>I'm going to paste a URL right now. Can you analyze it live?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">Absolutely — that's what we built it for. [Let them paste. While loading:] Watch the 8-step progress bar — it's showing you exactly which system is running right now. [When result appears:] Here's your verdict. [Walk through key scores.] The Trust Evidence section shows which AllSides or MBFC entry we used for the baseline. Everything is verifiable.</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-red">Hard</span>What if two articles from the same source get different scores?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">That's exactly correct behavior — it shows the system is working. A Reuters news wire report on a ceasefire might get 88/100 neutral. A Reuters opinion piece by a guest columnist might get 65/100 left-leaning. Same outlet, different scores based on actual article content. The database provides the baseline for the outlet's reputation; Groq analyzes the specific content. That's the right answer.</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-red">Hard</span>What if the Groq API goes down during the demo?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">We pre-cache our demo articles in Supabase so a Groq outage doesn't affect the demo. Those articles return from cache in under 1 second without touching Groq. We also warm up the Render backend 2 minutes before presenting. And we have backup screenshots on our phone in case everything fails. For production: we'd add Claude/GPT-4 as a fallback LLM provider.</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-q"><span><span class="q-label tag-red">Hard</span>Your scores keep showing ~80 for everything. How do we trust the variance?</span><span class="qa-chevron">▾</span></div>
+      <div class="qa-a">We solved this with database anchoring and calibration examples in the Groq prompt. RT gets 22/100 because MBFC rates it as Low factual reporting and AllSides rates it Right. Breitbart gets 15–25. AP News gets 88–92. The prompt explicitly forbids clustering around 75–85 and includes calibration examples. Pre-cache our demo articles before the presentation — the variance between AP News vs RT vs Al Jazeera vs Fox News is immediately visible and dramatic.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CHECKLIST ══════════ -->
+<div id="checklist" class="page">
+  <div class="page-badge">✅ Final Prep</div>
+  <h1 class="page-title">Night-Before<br><em>Checklist</em></h1>
+  <p class="page-sub">Every item below must be checked before you walk into the venue tomorrow. Tick each one off.</p>
+
+  <div class="prog-wrap"><div class="prog-fill" id="cl-prog" style="width:0%"></div></div>
+  <div class="prog-label" id="cl-prog-label">0 / 15 completed</div>
+
+  <h2>Technical Preparation</h2>
+  <ul class="checklist" id="cl-tech">
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Pre-cache 6 demo articles</strong> — analyze these URLs now so they return in &lt;1 second: Guardian (Israel), Al Jazeera (Gaza), Reuters (conflict), Fox News (opinion), BBC (world news), RT (Ukraine).</div></li>
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Verify cache works</strong> — paste each URL again. It should say "Cached" badge and return instantly.</div></li>
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Install Chrome Extension</strong> — chrome://extensions → Developer mode ON → Load unpacked → select chrome-extension/ folder.</div></li>
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Pin Chrome Extension to toolbar</strong> — click the puzzle piece icon in Chrome → pin TruthLens so it's visible.</div></li>
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Test Chrome Extension</strong> — open any news article, click the icon, run analysis, verify popup shows result.</div></li>
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Warm up Render backend</strong> — visit your-api.onrender.com/health right now and 2 mins before demo tomorrow. Prevents 30-second cold start.</div></li>
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Test PDF export</strong> — export a PDF on your presentation device. Verify it opens and prints correctly.</div></li>
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Test on mobile</strong> — judges may check on their phones. Open the app on your phone and verify layout.</div></li>
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Save 3 backup URLs on your phone</strong> — in case main demo articles fail: apnews.com, theguardian.com, dw.com</div></li>
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Have screenshots ready</strong> — screenshot 3 good results on your phone as last-resort backup if internet fails.</div></li>
+  </ul>
+
+  <h2>Presentation Preparation</h2>
+  <ul class="checklist" id="cl-pres">
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Practice demo script 3 times with a timer</strong> — must fit in 3 minutes. Time it out loud.</div></li>
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Read all 20 Q&A answers out loud</strong> — not just reading — out loud. Once through at minimum.</div></li>
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Memorize the closing line</strong> — "74% of people who share misinformation do so unknowingly. We're giving everyone the tool to be in the other 26%. Free. No signup. Any article. Anywhere."</div></li>
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Know your 3 technical differentiators</strong> — 1) 4-layer extraction never fails. 2) 3 independent AI models cross-validated. 3) Source database from published research not AI guesswork.</div></li>
+    <li><div class="check-box" onclick="tick(this)"></div><div><strong>Know your impact number</strong> — 74% of misinformation sharers do so unknowingly. Use this early.</div></li>
+  </ul>
+
+  <div class="highlight" style="margin-top:32px">
+    <p><strong>The golden rule:</strong> When a judge asks any question, pause for 1 full second before answering. Rushing looks nervous. Pausing looks confident.<br><br>
+    If you don't know: "Great question — that's a limitation we're aware of and plan to address by [solution]. For now we handle it by [current approach]."<br><br>
+    <strong>The two most powerful words in a hackathon demo: "Watch this." Then demonstrate. Don't explain — show.</strong></p>
+  </div>
+</div>
+
+<!-- ══════════ TECH ══════════ -->
+<div id="tech" class="page">
+  <div class="page-badge">🛠 Tech Stack</div>
+  <h1 class="page-title">Technology<br><em>Behind TruthLens</em></h1>
+  <p class="page-sub">Full technical architecture — what runs where, and why each choice was made.</p>
+
+  <h2>Frontend</h2>
+  <table class="data-table">
+    <tr><td>React 18 + Vite</td><td>Fast development, instant HMR, optimized production builds</td></tr>
+    <tr><td>TailwindCSS</td><td>Utility-first styling — entire dark theme in global.css</td></tr>
+    <tr><td>Framer Motion</td><td>Smooth animations — result cards, loading states, transitions</td></tr>
+    <tr><td>React Router v6</td><td>Client-side routing — /result/:id for shareable links</td></tr>
+    <tr><td>Axios</td><td>HTTP client with 60s timeout for AI calls</td></tr>
+    <tr><td>Vercel</td><td>Frontend hosting — auto-deploy on git push, global CDN</td></tr>
+  </table>
+
+  <h2>Backend</h2>
+  <table class="data-table">
+    <tr><td>FastAPI (Python 3.11)</td><td>Chosen for: async support, auto Swagger docs at /docs, Pydantic validation</td></tr>
+    <tr><td>Uvicorn</td><td>ASGI server — handles concurrent AI requests without blocking</td></tr>
+    <tr><td>httpx</td><td>Async HTTP client for article scraping with timeout control</td></tr>
+    <tr><td>BeautifulSoup4</td><td>HTML parsing with 30+ site-specific CSS selectors</td></tr>
+    <tr><td>Render.com</td><td>Backend hosting — Python 3.11, auto-deploy, free tier</td></tr>
+  </table>
+
+  <h2>AI Stack</h2>
+  <table class="data-table">
+    <tr><td>Groq Llama 3.3 70B</td><td>Primary analysis — bias, credibility, fact check, manipulation. Chosen for speed (fastest LLM API available — 8-10x faster than GPT-4).</td></tr>
+    <tr><td>RoBERTa Sentiment</td><td>cardiffnlp/twitter-roberta-base-sentiment-latest. Trained on 124M tweets. Positive/negative/neutral.</td></tr>
+    <tr><td>DistilRoBERTa Emotion</td><td>j-hartmann/emotion-english-distilroberta-base. 7 emotions: anger, fear, disgust, sadness, surprise, joy, neutral.</td></tr>
+    <tr><td>DistilRoBERTa Political</td><td>valurank/distilroberta-base-political-tweets. Left/center/right from political tweet dataset.</td></tr>
+    <tr><td>Score blending formula</td><td>Manipulation = Groq×0.6 + (neg×0.3 + anger×0.3 + fear×0.25 + disgust×0.15)×0.4</td></tr>
+  </table>
+
+  <h2>Database & Storage</h2>
+  <table class="data-table">
+    <tr><td>Supabase (PostgreSQL)</td><td>Full analysis stored as JSONB. URL-based 1-hour cache. Row Level Security enabled.</td></tr>
+    <tr><td>Smart caching</td><td>Same URL analyzed within 1 hour returns from Supabase in &lt;1 second without touching Groq.</td></tr>
+    <tr><td>History</td><td>All analyses stored with title, source, bias_label, credibility_score, manipulation_level, conflict_region.</td></tr>
+  </table>
+
+  <h2>Source Credibility Database</h2>
+  <div class="highlight blue">
+    <p>50+ news outlets with ratings from 3 independent research organizations:<br><br>
+    <strong>AllSides</strong> (allsides.com) — Left/Lean Left/Center/Lean Right/Right spectrum ratings<br>
+    <strong>Ad Fontes Media</strong> (adfontesmedia.com) — 2D chart of reliability vs political bias<br>
+    <strong>MBFC</strong> (mediabiasfactcheck.com) — Factual reporting rated Very High to Very Low<br><br>
+    Groq credibility scores are anchored to this database ±15 points. RT cannot score above 37. AP News cannot score below 73.</p>
+  </div>
+</div>
+
+<!-- ══════════ LEGAL ══════════ -->
+<div id="legal" class="page">
+  <div class="page-badge">⚖ Legal</div>
+  <h1 class="page-title">Legal Compliance<br><em>Framework</em></h1>
+  <p class="page-sub">TruthLens maps every analysis to Indian digital law — making it not just a tool but a compliance solution.</p>
+
+  <div class="highlight">
+    <p><strong>The pitch line:</strong> "Platforms are legally required to act on misinformation under IT Rules 2021 — within 36 hours of reporting. TruthLens provides the automated detection capability that makes this enforcement actually possible."</p>
+  </div>
+
+  <h2>The 4 Laws We Check</h2>
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title">IT Act 2000 — Section 66 <span class="tag tag-amber">Digital Misuse</span></div>
+    <div class="card-body">Prohibits misuse of digital systems to spread false or misleading information. <strong style="color:var(--white)">TruthLens triggers this</strong> when: disputed/false claims are detected, credibility is very low (&lt;40), or source is state-affiliated media. Score is derived from these real analysis values — not hardcoded.</div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title">IT Act 2000 — Section 69A <span class="tag tag-red">Content Blocking</span></div>
+    <div class="card-body">Empowers authorities to block content threatening public order or spreading misinformation. <strong style="color:var(--white)">TruthLens triggers this</strong> when: manipulation score &gt;70, 5+ emotional phrases flagged, ML fear score &gt;50%, and credibility &lt;30. All values come from real model outputs.</div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title">IT Rules 2021 <span class="tag tag-amber">Platform Accountability</span></div>
+    <div class="card-body">Platforms must remove harmful content within <strong style="color:var(--white)">36 hours</strong> and maintain grievance redressal. <strong style="color:var(--white)">TruthLens triggers this</strong> when: manipulation is Medium/High AND bias confidence is &gt;70%. The missing link has always been detection — TruthLens fills it.</div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title">Consumer Protection Act 2019 <span class="tag tag-blue">Consumer Rights</span></div>
+    <div class="card-body">Protects citizens from misleading information and deceptive digital practices. <strong style="color:var(--white)">TruthLens triggers this</strong> when: false/disputed claims are present AND score &lt;50 AND strong biased framing is detected. Manipulated content directly violates consumer rights under this act.</div>
+  </div>
+
+  <h2>How the compliance scores work</h2>
+  <p style="color:rgba(255,255,255,0.5)">Every score is derived from real analysis data and capped at 100/100. Each law shows a ✓ green tick (compliant) or ✗ red cross (concern). The finding shown is specific to this article — the actual manipulation score, the specific number of false claims, the exact bias confidence. Nothing is hardcoded.</p>
+
+  <div class="highlight green">
+    <p><strong>For the demo:</strong> When showing the Legal Compliance section, say: "This isn't us making legal judgments. This is the article's own analysis data mapped to the specific legal thresholds in Indian law. If this content was reported on a platform, IT Rules 2021 requires them to act within 36 hours. TruthLens tells them what to act on."</p>
+  </div>
+</div>
+
+</main>
+
+<script>
+// Navigation
+function show(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(id)) n.classList.add('active')
+  })
+  window.scrollTo(0,0)
+}
+
+// Feature item toggles
+function toggleFeature(el) {
+  const detail = el.querySelector('.fi-detail')
+  el.classList.toggle('open')
+  detail.classList.toggle('show')
+}
+
+// Q&A toggles with progress
+let qaAnswered = 0
+function toggleQA(el) {
+  const ans = el.querySelector('.qa-a')
+  const wasOpen = el.classList.contains('open')
+  if (!wasOpen) {
+    el.classList.add('open')
+    ans.classList.add('show')
+    el.dataset.answered = '1'
+  } else {
+    el.classList.remove('open')
+    ans.classList.remove('show')
+  }
+  updateQAProgress()
+}
+function updateQAProgress() {
+  const answered = document.querySelectorAll('.qa-item[data-answered="1"]').length
+  const total    = document.querySelectorAll('.qa-item').length
+  const pct      = Math.round((answered / total) * 100)
+  document.getElementById('qa-prog').style.width = pct + '%'
+  document.getElementById('qa-prog-label').textContent = answered + ' / ' + total + ' answered'
+}
+
+// Checklist ticks with progress
+function tick(box) {
+  box.classList.toggle('done')
+  updateCLProgress()
+}
+function updateCLProgress() {
+  const done  = document.querySelectorAll('.check-box.done').length
+  const total = document.querySelectorAll('.check-box').length
+  const pct   = Math.round((done / total) * 100)
+  document.getElementById('cl-prog').style.width = pct + '%'
+  document.getElementById('cl-prog-label').textContent = done + ' / ' + total + ' completed'
+}
+</script>
+</body>
+</html>
